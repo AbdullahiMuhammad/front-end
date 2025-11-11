@@ -2,7 +2,7 @@ import axiosInstance, { proxy }  from "./api"
 
 
 
-export const signUp = async (user) => {
+export const createUser = async (user) => {
     try {
       const response = await axiosInstance.post(`${proxy}/auth/signup`, user);
       return response.data;

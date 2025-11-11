@@ -4,7 +4,7 @@ export default function IncidentListSidebar({ user, incidents, onSelect, selecte
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ status: "" });
-  console.log(user)
+
 
   useEffect(() => {
     if (!user || !incidents) return;

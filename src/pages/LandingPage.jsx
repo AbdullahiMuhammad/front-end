@@ -31,7 +31,7 @@ const LandingPage = () => {
           An Innovative Approach to Safety, Transparency, and Efficiency in the Petroleum Sector
         </p>
         <Link
-          to="/reporting-incident"
+          to="/reporting"
           className="bg-yellow-400 hover:bg-green-500 text-black font-bold py-3 px-6 rounded-lg shadow-lg transition transform hover:scale-105"
         >
           Report Incident
@@ -42,8 +42,7 @@ const LandingPage = () => {
       <section id="about" className="py-20 px-6 md:px-20 bg-white text-black">
         <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">About NMPDRA</h2>
         <p className="text-lg md:text-xl max-w-4xl mx-auto text-center">
-          The National Maritime and Ports Disaster Response Agency (NMPDRA) ensures rapid emergency response,
-          safety, and effective management of maritime and port disasters nationwide. 
+        Nigerian Midstream and Downstream Petroleum Regulatory Authority (NMDPRA) ensures rapid emergency response, safety, and effective management of the Misdstram and Downstream Oil and Gas sectors of Petroleum industry.
         </p>
       </section>
 

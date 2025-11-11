@@ -1,24 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import InfoTab from "./tabs/InfoTab";
 import BriefsTab from "./tabs/BriefsTab";
 import ReportingTab from "./tabs/ReportingTab";
 import MembersTab from "./tabs/MembersTab";
 import SettingsTab from "./tabs/SettingsTab";
+import { useSelector } from "react-redux";
 
-export default function IncidentModal({ incident, user, onClose }) {
+export default function IncidentModal({incident, onClose }) {
   const [activeTab, setActiveTab] = useState("info");
-
+   const {user} = useSelector((state) => state.user);
+  
+  
   const allowedTabs = (() => {
     if (!user) return ["info"];
 
     switch (user.level) {
-      case "central":
+      case 2:
+      case 4:  
         return ["info", "briefs", "reporting", "members", "settings"];
-      case "state":
-        return ["info", "briefs", "reporting", "members", "settings"];
-      case "zone":
+      case 3:
         return ["info", "briefs"];
-      case "agent":
+      case 1:
         return ["info"];
       default:
         return ["info"];
@@ -50,7 +52,7 @@ export default function IncidentModal({ incident, user, onClose }) {
       {/* Tab Content */}
       <div className="flex-1 overflow-y-auto">
         {activeTab === "info" && <InfoTab incident={incident} />}
-        {activeTab === "briefs" && <BriefsTab incident={incident} />}
+        {activeTab === "briefs" && <BriefsTab incident={incident} user={user} />}
         {activeTab === "reporting" && <ReportingTab incident={incident} />}
         {activeTab === "members" && <MembersTab incident={incident} />}
         {activeTab === "settings" && <SettingsTab incident={incident} />}

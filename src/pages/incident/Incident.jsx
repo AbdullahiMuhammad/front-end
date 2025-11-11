@@ -1,45 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import IncidentModal from "./IncidentModal";
 import IncidentForm from "./IncidentForm";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-// Sample incident data
-const sampleIncidents = [
-  {
-    _id: "1",
-    title: "Incident #123",
-    status: "open",
-    zone: "Zone 1",
-    state: "Lagos State",
-    date: "2025-11-10",
-    description: "Detailed info about Incident #123",
-  },
-  {
-    _id: "2",
-    title: "Incident #124",
-    status: "in progress",
-    zone: "Zone 2",
-    state: "Abuja State",
-    date: "2025-11-09",
-    description: "Detailed info about Incident #124",
-  },
-];
+//import { incidents } from '../../assets/data.js/incident'
+
 
 export default function IncidentPage() {
-  const {user} = useSelector((state) => state.user)
-  const {incidents} = useSelector((state) => state.incidents)
+  const {user} = useSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const incidents = useSelector((state) => state.incident.incidents || []);
+  
   const [selectedIncident, setSelectedIncident] = useState(null);
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
-  
 
-  // Filter incidents
-  const filteredIncidents = sampleIncidents.filter((i) => {
-    const matchSearch = i.title.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter ? i.status === statusFilter : true;
-    return matchSearch && matchStatus;
-  });
+
+
+
+
+  const filteredIncidents = (incidents || []).filter((i) => {
+  const title = i?.title?.toLowerCase() || "";
+  const matchSearch = title.includes(search.toLowerCase());
+  const matchStatus = statusFilter ? i?.status === statusFilter : true;
+  return matchSearch && matchStatus;
+});
+
 
   const handleCreate = () => {
     setSelectedIncident(null);
@@ -92,9 +79,9 @@ export default function IncidentPage() {
 
         {/* Incident List */}
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
-          {filteredIncidents.map((i) => (
+          {filteredIncidents.map((i,index) => (
             <div
-              key={i._id}
+              key={index}
               onClick={() => setSelectedIncident(i)}
               className={`p-3 bg-white rounded-lg shadow-sm hover:shadow-md cursor-pointer flex flex-col ${
                 selectedIncident?._id === i._id ? "bg-yellow-100" : "bg-white"

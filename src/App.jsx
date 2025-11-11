@@ -11,13 +11,12 @@ import Incident from "./pages/incident/Incident";
 import Home from "./pages/Home";
 import Dashboard from './pages/dashboards/Dashboard'
 import LandingPage from "./pages/LandingPage";
-import IncidentForm from "./pages/auth/IncidentForm";
 import Agents from "./pages/agent/Agents";
 import Settings from "./pages/settings/Settings";
 import Profile from "./pages/profile/Profile";
 import Notifications from "./pages/notification/Notifications";
-import Agency from "./pages/agency/Agency";
-
+import Reports from "./pages/reports/Reports";
+import ReportForm from "./pages/auth/ReportForm";
 
 
 
@@ -41,11 +40,12 @@ export default function App() {
         <div className="flex-1 bg-gray-200 h-[100vh_-_40px] overflow-y-auto">
           <Routes>
               <Route path="/" element={<LandingPage />} />
-              <Route path="/reporting-incident" element={<IncidentForm />} />
-             <Route path="/login" element={<LoginPage />} />
-             <Route path="/register" element={<Signup />} />
-             <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reporting" element={<ReportForm />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
+           
               
              {/* Protected routes */}
              <Route
@@ -56,14 +56,14 @@ export default function App() {
                }
              >
                 {/* Nested routes under DashboardLayout */}
-                <Route path="/agents" element={<Agents />} />
-              <Route path="/incidents" element={<Incident />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                 <Route path="/dashboard" element={<Dashboard />} />
+                 <Route path="/reports" element={<Reports />} />
+                 <Route path="/incidents" element={<Incident />} />
                  <Route path="/notifications" element={<Notifications />} />
-                 <Route path="/settings" element={<Settings />} />
-                 <Route path="/agency" element={<Agency />} />
+                  <Route path="/inspectors" element={<Agents />} />
                  <Route path="/profile" element={<Profile />} />
-                 <Route path="/profile" element={<Profile />} />
+                  <Route path="/settings" element={<Settings />} />
+
                 
                  
 

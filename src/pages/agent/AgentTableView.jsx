@@ -1,6 +1,23 @@
 import React from "react";
 
+const LEVELS = {
+  1: "Inspector",
+  2: "State Coordinator",
+  3: "Zonal Coordinator",
+  4: "Admin",
+};
+
 export default function AgentTableView({ agents, editing, handleLevelUpdate }) {
+
+  
+
+
+
+
+
+
+
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border border-gray-300 rounded-md">
@@ -35,28 +52,28 @@ export default function AgentTableView({ agents, editing, handleLevelUpdate }) {
               <td className="p-3">
                 {editing ? (
                   <select
-                    value={a.designation}
-                    onChange={(e) => handleLevelUpdate(a._id, e.target.value)}
+                    value={a.level}
+                    onChange={(e) => handleLevelUpdate(a._id, parseInt(e.target.value))}
                     className="border border-gray-300 rounded-md p-1 text-sm"
                   >
-                    <option value="central">Central</option>
-                    <option value="zone">Zone</option>
-                    <option value="state">State</option>
-                    <option value="local">Local</option>
+                    <option value={1}>Inspector</option>
+                    <option value={2}>State Coordinator</option>
+                    <option value={3}>Zonal Coordinator</option>
+                    <option value={4}>Admin</option>
                   </select>
                 ) : (
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      a.designation === "central"
+                      a.level === 4
                         ? "bg-black text-white"
-                        : a.designation === "zone"
+                        : a.level === 3
                         ? "bg-green-600 text-white"
-                        : a.designation === "state"
+                        : a.level === 2
                         ? "bg-yellow-400 text-black"
                         : "bg-gray-300 text-black"
                     }`}
                   >
-                    {a.designation}
+                    {LEVELS[a.level] || "—"}
                   </span>
                 )}
               </td>

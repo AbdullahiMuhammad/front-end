@@ -7,6 +7,11 @@ export default defineConfig({
   plugins: [react(),  tailwindcss(),],
   optimizeDeps: {
     include: ['reselect']
-  }
+  },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5000',
+    },
+  },
 
 })

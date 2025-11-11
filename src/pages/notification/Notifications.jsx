@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setNotifications } from '../../component/redux/notificationSlice';
 
 // Example notifications data
 const exampleNotifications = [
@@ -29,18 +31,19 @@ const exampleNotifications = [
 ];
 
 const NotificationPage = () => {
-  const [notifications, setNotifications] = useState([]);
-
+  //const [notifications, setNotifications] = useState([]);
+  const { notifications } = useSelector((state) => state.notification || []);
+   const dispatch = useDispatch();
   useEffect(() => {
     // Fetch notifications from API here
     setNotifications(exampleNotifications);
   }, []);
 
   const markAsRead = (id) => {
-    setNotifications(
+    dispatch(setNotifications(
       notifications.map((n) =>
         n.id === id ? { ...n, status: 'read' } : n
-      )
+      ))
     );
   };
 

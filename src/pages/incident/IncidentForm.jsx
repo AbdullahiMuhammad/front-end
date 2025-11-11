@@ -1,353 +1,367 @@
 import React, { useState } from "react";
-import { BiArrowBack } from "react-icons/bi";
-import { createIncident } from "../../services/incident";
 import { toast } from "react-toastify";
+import { BiArrowBack } from "react-icons/bi";
+import { createIncident, updateIncident } from "../../services/incident";
 import { useNavigate } from "react-router-dom";
-import statesAndLGAs from "../../assets/data.js/states"; // your states/LGAs data
-
-const severityLevels = ["Low", "Medium", "High", "Critical"];
-const statusOptions = ["New", "In Progress", "Resolved", "Closed"];
-const permissions = ["view", "reporter", "admin"];
+import statesAndLGAs from "../../assets/data.js/states";
 
 const IncidentForm = ({ users = [], authUser, back, initialData = null }) => {
   const navigate = useNavigate();
 
-  console.log(users)
-  const [formData, setFormData] = useState({
-    title: "",
-    type: "",
-    date: new Date().toISOString().split("T")[0],
-    state: "",
-    localGov: "",
-    severity: "",
-    status: "New",
-    summaryResponse: "",
-    affectedPopulation: 0,
-    casualties: 0,
-    resources: "",
-    witnesses: 0,
-    members: [], // array of { user: ObjectId, permission }
-    createdBy: authUser?._id || "",
-  });
-
-  const [search, setSearch] = useState("");
+  const isEdit = !!initialData;
   const [loading, setLoading] = useState(false);
 
+  const [formData, setFormData] = useState(
+    initialData || {
+      title: "",
+      incidentType: "",
+      description: "",
+      dateOfIncident: new Date().toISOString().split("T")[0],
+      timeOfIncident: "",
+      facilityType: "",
+      state: "",
+      lga: "",
+      address: "",
+      coordinates: { lat: "", lng: "" },
+      cause: "",
+      immediateActionsTaken: "",
+      injured: 0,
+      fatalities: 0,
+      environmentalImpact: "",
+      regulatoryBodiesNotified: [],
+      mediaCoverage: false,
+      photos: [],
+      investigationFindings: "",
+      rootCauseAnalysis: "",
+      correctiveActions: "",
+      preventiveActions: "",
+      followUpStatus: "Not Started",
+      confidentiality: "Restricted",
+      members: [],
+      notificationsEnabled: true,
+      createdBy: authUser?._id,
+    }
+  );
+
+  const facilityTypes = [
+    "Depot",
+    "Pipeline",
+    "Filling Station",
+    "Refinery",
+    "Vessel",
+    "Storage Tank",
+    "Transport Vehicle",
+    "Other",
+  ];
+  const incidentTypes = [
+    "Fire",
+    "Explosion",
+    "Oil Spill",
+    "Gas Leak",
+    "Vandalism",
+    "Equipment Failure",
+    "Other",
+  ];
+  const followStatuses = ["Not Started", "Ongoing", "Completed"];
+  const confidentialityLevels = ["Public", "Restricted", "Confidential"];
+
+  // ---------------- Handlers ----------------
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "state") {
-      setFormData((prev) => ({ ...prev, state: value, localGov: "" }));
+    const { name, value, type, checked } = e.target;
+
+    if (name.startsWith("coordinates.")) {
+      const field = name.split(".")[1];
+      setFormData((prev) => ({
+        ...prev,
+        coordinates: { ...prev.coordinates, [field]: value },
+      }));
+    } else if (type === "checkbox") {
+      setFormData((prev) => ({ ...prev, [name]: checked }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleArrayChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: prev[name].includes(value)
+        ? prev[name].filter((item) => item !== value)
+        : [...prev[name], value],
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validation
-    const requiredFields = ["title", "type", "state", "localGov", "severity", "status"];
-    for (let field of requiredFields) {
-      if (!formData[field] || (typeof formData[field] === "string" && !formData[field].trim())) {
-        toast.error(`Please fill in the ${field} field.`);
-        setLoading(false);
-        return;
-      }
-    }
-
     try {
-      const dataToSubmit = {
-        ...formData,
-        affectedPopulation: Number(formData.affectedPopulation),
-        casualties: Number(formData.casualties),
-        witnesses: Number(formData.witnesses),
-        createdBy: authUser?._id,
-      };
-
-      const response = await createIncident(dataToSubmit);
+      const response = isEdit
+        ? await updateIncident(initialData._id, formData)
+        : await createIncident(formData);
 
       if (response?.success) {
-        toast.success(response.message || "Incident created successfully!");
+        toast.success(response.message || "Incident saved successfully!");
         back();
       } else {
-        toast.error(response?.message || "Failed to create incident");
+        toast.error(response?.message || "Failed to save incident");
       }
     } catch (err) {
       console.error(err);
-      toast.error(err?.message || "Something went wrong. Please try again.");
+      toast.error("Something went wrong. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ---------------- Render ----------------
   return (
-    <div className="w-[80%] md:w-full mx-auto p-6 bg-white shadow-md rounded-md overflow-y-auto">
-      {/* Header */}
-      <div className="flex flex-col md:hiddenjustify-between items-start md:items-center mb-6 gap-3">
-        <h2 className="text-2xl font-semibold ">Create Incident</h2>
+    <div className="w-[85%] md:w-full mx-auto p-6 bg-white shadow-md rounded-md">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={back} className="text-gray-600 hover:text-black">
+          <BiArrowBack size={22} />
+        </button>
+        <h2 className="text-2xl font-semibold">
+          {isEdit ? "Edit Incident" : "Incident Report"}
+        </h2>
       </div>
 
-      {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Basic Fields */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-gray-700">Title</label>
+        {/* BASIC INFO */}
+        <section>
+          <h3 className="font-semibold text-lg mb-2">Basic Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               name="title"
+              placeholder="Incident Title"
               value={formData.title}
               onChange={handleChange}
               required
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
+              className="border p-2 rounded"
             />
-          </div>
-
-          <div>
-            <label className="block text-gray-700">Type</label>
-            <input
-              type="text"
-              name="type"
-              value={formData.type}
+            <select
+              name="incidentType"
+              value={formData.incidentType}
               onChange={handleChange}
               required
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
+              className="border p-2 rounded"
+            >
+              <option value="">Select Type</option>
+              {incidentTypes.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
 
-          <div>
-            <label className="block text-gray-700">Date</label>
+            <select
+              name="facilityType"
+              value={formData.facilityType}
+              onChange={handleChange}
+              className="border p-2 rounded"
+            >
+              <option value="">Facility Type</option>
+              {facilityTypes.map((f) => (
+                <option key={f}>{f}</option>
+              ))}
+            </select>
+
             <input
               type="date"
-              name="date"
-              value={formData.date}
+              name="dateOfIncident"
+              value={formData.dateOfIncident}
               onChange={handleChange}
               required
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
+              className="border p-2 rounded"
+            />
+            <input
+              type="time"
+              name="timeOfIncident"
+              value={formData.timeOfIncident}
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={formData.description}
+              onChange={handleChange}
+              required
+              className="col-span-2 border p-2 rounded"
             />
           </div>
+        </section>
 
-          {/* State Select */}
-          <div>
-            <label className="block text-gray-700 mb-1">State</label>
+        {/* LOCATION */}
+        <section>
+          <h3 className="font-semibold text-lg mb-2">Location</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <select
               name="state"
               value={formData.state}
               onChange={handleChange}
               required
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
+              className="border p-2 rounded"
             >
               <option value="">Select State</option>
               {Object.keys(statesAndLGAs).map((state) => (
-                <option key={state} value={state}>
-                  {state}
-                </option>
+                <option key={state}>{state}</option>
               ))}
             </select>
-          </div>
-
-          {/* Local Government Select */}
-          <div>
-            <label className="block text-gray-700 mb-1">Local Government</label>
             <select
-              name="localGov"
-              value={formData.localGov}
+              name="lga"
+              value={formData.lga}
               onChange={handleChange}
               disabled={!formData.state}
               required
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
+              className="border p-2 rounded"
             >
               <option value="">
-                {formData.state ? "Select Local Government" : "Select a State first"}
+                {formData.state ? "Select LGA" : "Select State First"}
               </option>
               {formData.state &&
                 statesAndLGAs[formData.state].map((lga) => (
-                  <option key={lga} value={lga}>
-                    {lga}
-                  </option>
+                  <option key={lga}>{lga}</option>
                 ))}
             </select>
-          </div>
-
-          <div>
-            <label className="block text-gray-700">Severity</label>
-            <select
-              name="severity"
-              value={formData.severity}
-              onChange={handleChange}
-              required
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Select Severity</option>
-              {severityLevels.map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-gray-700">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              required
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="">Select Status</option>
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Numeric Fields */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-gray-700">Affected Population</label>
             <input
-              type="number"
-              name="affectedPopulation"
-              value={formData.affectedPopulation}
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={formData.address}
               onChange={handleChange}
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
+              className="border p-2 rounded col-span-2"
             />
+            <div className="flex gap-2">
+              <input
+                type="number"
+                step="any"
+                name="coordinates.lat"
+                placeholder="Latitude"
+                value={formData.coordinates.lat}
+                onChange={handleChange}
+                className="border p-2 rounded w-1/2"
+              />
+              <input
+                type="number"
+                step="any"
+                name="coordinates.lng"
+                placeholder="Longitude"
+                value={formData.coordinates.lng}
+                onChange={handleChange}
+                className="border p-2 rounded w-1/2"
+              />
+            </div>
           </div>
+        </section>
 
-          <div>
-            <label className="block text-gray-700">Casualties</label>
-            <input
-              type="number"
-              name="casualties"
-              value={formData.casualties}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700">Witnesses</label>
-            <input
-              type="number"
-              name="witnesses"
-              value={formData.witnesses}
-              onChange={handleChange}
-              className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
-            />
-          </div>
-        </div>
-
-        {/* Resources & Summary */}
-        <div>
-          <label className="block text-gray-700">Resources</label>
+        {/* BRIEFING */}
+        <section>
+          <h3 className="font-semibold text-lg mb-2">Inspectors Report</h3>
           <textarea
-            name="resources"
-            value={formData.resources}
+            name="cause"
+            placeholder="Cause"
+            value={formData.cause}
             onChange={handleChange}
-            className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
+            className="w-full border p-2 rounded"
           />
-        </div>
-
-        <div>
-          <label className="block text-gray-700">Summary / Response</label>
           <textarea
-            name="summary"
-            value={formData.summary}
+            name="immediateActionsTaken"
+            placeholder="Immediate Actions Taken"
+            value={formData.immediateActionsTaken}
             onChange={handleChange}
-            className="w-full mt-1 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
-            placeholder="Optional, for managers/admins or responders"
+            className="w-full border p-2 rounded mt-2"
           />
-        </div>
 
-        {/* Members & Permissions */}
-        <div>
-          <label className="block text-gray-700 mb-1">Members & Permissions</label>
-          <input
-            type="text"
-            placeholder="Search users..."
-            className="w-full mb-2 p-2 border rounded-md focus:ring-2 focus:ring-blue-400"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+          <div className="grid grid-cols-3 gap-3 mt-2">
+            <input
+              type="number"
+              name="injured"
+              placeholder="Injured"
+              value={formData.injured}
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              type="number"
+              name="fatalities"
+              placeholder="Fatalities"
+              value={formData.fatalities}
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+            <input
+              type="text"
+              name="environmentalImpact"
+              placeholder="Environmental Impact"
+              value={formData.environmentalImpact}
+              onChange={handleChange}
+              className="border p-2 rounded"
+            />
+          </div>
+        </section>
+
+        {/* FOLLOW-UP */}
+        <section>
+          <h3 className="font-semibold text-lg mb-2">Follow-Up</h3>
+          <textarea
+            name="investigationFindings"
+            placeholder="Investigation Findings"
+            value={formData.investigationFindings}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
           />
-          <div className="border rounded-md p-2 max-h-56 overflow-y-auto">
-     {users
-  .filter((u) => {
-    if (u._id === authUser?._id) return false;
-    const fullName = u.fullName?.toLowerCase() || `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
-    return fullName.includes(search.toLowerCase());
-  })
-  .map((u) => {
-    const member = formData.members.find((m) => m.user === u._id);
-    const fullName = u.fullName || `${u.firstName || ""} ${u.lastName || ""}`;
-    return (
-      <div key={u._id} className="flex items-center gap-2 mb-1">
-        <input
-          type="checkbox"
-          checked={!!member}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setFormData((prev) => ({
-                ...prev,
-                members: [...prev.members, { user: u._id, permission: "view" }],
-              }));
-            } else {
-              setFormData((prev) => ({
-                ...prev,
-                members: prev.members.filter((m) => m.user !== u._id),
-              }));
-            }
-          }}
-        />
-        <span>{fullName}</span>
-
-        {member && (
+          <textarea
+            name="correctiveActions"
+            placeholder="Corrective Actions"
+            value={formData.correctiveActions}
+            onChange={handleChange}
+            className="w-full border p-2 rounded mt-2"
+          />
           <select
-            value={member.permission}
-            onChange={(e) => {
-              const permission = e.target.value;
-              setFormData((prev) => ({
-                ...prev,
-                members: prev.members.map((m) =>
-                  m.user === u._id ? { ...m, permission } : m
-                ),
-              }));
-            }}
-            className="ml-2 p-1 border rounded"
+            name="followUpStatus"
+            value={formData.followUpStatus}
+            onChange={handleChange}
+            className="border p-2 rounded mt-2"
           >
-            {permissions.map((p) => (
-              <option key={p} value={p}>
-                {p.charAt(0).toUpperCase() + p.slice(1)}
-              </option>
+            {followStatuses.map((s) => (
+              <option key={s}>{s}</option>
             ))}
           </select>
-        )}
-      </div>
-    );
-  })}
-</div>
-</div>
+        </section>
 
-
-        {/* Submit */}
-        <div>
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-2 rounded-md bg-yellow-500 hover:bg-yellow-600 transition ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
+        {/* CONFIDENTIALITY */}
+        <section>
+          <h3 className="font-semibold text-lg mb-2">Settings</h3>
+          <select
+            name="confidentiality"
+            value={formData.confidentiality}
+            onChange={handleChange}
+            className="border p-2 rounded"
           >
-            {loading ? "Submitting..." : "Create Incident"}
-          </button>
-        </div>
+            {confidentialityLevels.map((c) => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
+          <div className="mt-2 flex items-center gap-2">
+            <input
+              type="checkbox"
+              name="notificationsEnabled"
+              checked={formData.notificationsEnabled}
+              onChange={handleChange}
+            />
+            <label>Enable Notifications</label>
+          </div>
+        </section>
+
+        {/* SUBMIT */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        >
+          {loading ? "Saving..." : isEdit ? "Update Incident" : "Create Incident"}
+        </button>
       </form>
     </div>
   );

@@ -1,75 +1,45 @@
 import { 
-  FiHome,
-  FiClipboard,
-  FiEdit,
-  FiFileText,
-  FiFilePlus,
-  FiTruck,
-  FiUserCheck,
-  FiUpload,
-  FiBarChart2,
-  FiBell,
-  FiSettings,
-  FiSearch,
-  FiGlobe,
-  FiAlertCircle,
-  FiUser,
-  FiArchive,
-  
-} from "react-icons/fi";
-import { RiTeamFill } from 'react-icons/ri'
+  FiUserCheck,FiBell,FiSettings, FiAlertCircle, FiUser,} from "react-icons/fi";
 import { MdOutlineDashboard } from "react-icons/md";
-
-
-// SidebarData.js
+import { GoReport } from 'react-icons/go';
+import { BiSolidReport } from "react-icons/bi";
 
 export const sidebarData = {
-  agent : [
-    { label: "Notifications", icon: FiBell, path: "/notifications" },
-    { label: "Incidents", icon: FiClipboard, path: "/incidents" },
-    { label: "Settings", icon: FiSettings, path: "/settings" },
-    { label: "Profile ", icon: FiUser, path: "/profile" },
+  1: [
+    { label: "Report", icon: BiSolidReport, path: "/reports", badgeKey: "report" },
+    { label: "Incidents", icon: GoReport, path: "/incidents", badgeKey: "incidentCount" },
+    { label: "Notifications", icon: FiBell, path: "/notifications", badgeKey: "unreadNotifications" },
+    { label: "Profile", icon: FiUser, path: "/profile", hideOnBottomTab: true },
+    { label: "Settings", icon: FiSettings, path: "/settings", hideOnBottomTab: true },
   ],
-  agencies : [
+  
+  2: [
     { label: "Dashboard", icon: MdOutlineDashboard, path: "/dashboard" },
-    { label: "Incident Alerts", icon: FiEdit, path: "/incidents-alerts" ,  },
-    { label: "Incidents", icon: FiClipboard, path: "/incidents" },
-    { label: "Notifications", icon: FiBell, path: "/notifications" , count: "Notify"},
-    { label: "Field Agents", icon: FiUserCheck, path: "/agents" },
-    { label: "Profile", icon: FiSettings, path: "/profile" },
-    { label: "Profile ", icon: FiUser, path: "/profile" },
+    { label: "Incidents", icon: GoReport, path: "/incidents", badgeKey: "incidentCount" },
+    { label: "Report", icon: BiSolidReport, path: "/reports", badgeKey: "report" },
+    { label: "Notifications", icon: FiBell, path: "/notifications", badgeKey: "unreadNotifications" },
+    { label: "Inspectors", icon: FiUserCheck, path: "/inspectors" },
+    { label: "Profile", icon: FiUser, path: "/profile", hideOnBottomTab: false },
+    { label: "Settings", icon: FiSettings, path: "/settings", hideOnBottomTab: true },
   ],
-  state: [
+
+  3: [
     { label: "Dashboard", icon: MdOutlineDashboard, path: "/dashboard" },
-    { label: "Incidents", icon: FiClipboard, path: "/incidents" },
-    { label: "Notifications", icon: FiBell, path: "/notifications", count: "notify" },
-    { label: "Field Agents", icon: FiUserCheck, path: "/agents" },
-    { label: "Settings", icon: FiSettings, path: "/settings" },
-     { label: "Profile ", icon: FiUser, path: "/profile" },
+    { label: "Incidents", icon: GoReport, path: "/incidents", badgeKey: "incidentCount" },
+    { label: "Report", icon: BiSolidReport, path: "/reports", badgeKey: "report" }, 
+    { label: "Notifications", icon: FiBell, path: "/notifications", badgeKey: "unreadNotifications" },
+    { label: "Inspectors", icon: FiUserCheck, path: "/inspectors" },
+    { label: "Profile", icon: FiUser, path: "/profile", },
+    { label: "Settings", icon: FiSettings, path: "/settings", hideOnBottomTab: true }, 
   ],
 
-  zonal: [
+  4: [
     { label: "Dashboard", icon: MdOutlineDashboard, path: "/dashboard" },
-    { label: "Incidents", icon: FiClipboard, path: "/incidents" },
-    { label: "Notifications", icon: FiBell, path: "/notifications" },
-    { label: "Field Agents", icon: FiUserCheck, path: "/agents" },
-    { label: "Settings", icon: FiSettings, path: "/settings" },
-     { label: "Profile ", icon: FiUser, path: "/profile" },
+    { label: "Report", icon: BiSolidReport, path: "/reports", badgeKey: "report" },
+    { label: "Incidents", icon: FiAlertCircle, path: "/incidents", badgeKey: "incidentCount" },
+    { label: "Notifications", icon: FiBell, path: "/notifications", badgeKey: "unreadNotifications" },
+    { label: "Inspectors", icon: FiUserCheck, path: "/inspectors" },
+    { label: "Admin", icon: FiUser, path: "/profile", },
+    { label: "Settings", icon: FiSettings, path: "/settings", hideOnBottomTab: true },
   ],
-
-  central: [
-    { label: "Dashboard", icon:MdOutlineDashboard, path: "/dashboard" },
-    { label: "Incidents", icon: FiAlertCircle, path: "/incidents", badgeKey: "incidentCount", },
-    { label: "Notifications", icon: FiBell, path: "/notifications", count: "notify", badgeKey: "unreadNotifications", },
-    //{ label: "Agencies", icon: FiTruck, path: "/agency" },
-    { label: "Field Agents", icon: FiUserCheck, path: "/agents" },
-    { label: "Settings", icon: FiSettings, path: "/settings" },
-    { label: "Profile ", icon: FiUser, path: "/profile" },
-  ],
-
-
 };
-
-
-
-

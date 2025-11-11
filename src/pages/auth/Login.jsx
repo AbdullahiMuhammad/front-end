@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,7 +51,7 @@ export default function LoginPage() {
         </div>
 
         <h1 className="text-center text-3xl font-bold mb-6 text-green-700 tracking-tight">
-          Organization Title
+           Login
         </h1>
 
         <form onSubmit={handleLogin} className="space-y-4 relative z-10">

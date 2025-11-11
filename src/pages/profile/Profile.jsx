@@ -1,155 +1,146 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { getLoggedUser } from "../../services/user";
 import { useSelector } from "react-redux";
+// This is a mock API function to get user data.
+const fetchUserData = async () => {
+  return {
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    phone: "123-456-7890",
+    address: "123 Main St, Cityville",
+    state: "NY",
+    zone: "Zone 1",
+    localGovernment: "City District",
+    roles: ["admin"],
+    reputation: 150,
+    profilePic: null, // Assume no profile pic for now
+  };
+};
 
-export default function UserProfileFull() {
-  const {user, users} = useSelector((state) => state.user);
-  const [editMode, setEditMode] = useState(false);
-  const [form, setForm] = useState({});
-  const [profilePic, setProfilePic] = useState(null);
-  const [loading, setLoading] = useState(false);
-  
+const Profile = () => {
+  const user = useSelector((state) => state.user.user);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [newPhone, setNewPhone] = useState("");
+  const [newAddress, setNewAddress] = useState("");
+  const [newProfilePic, setNewProfilePic] = useState(null);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleImageChange = (e) => setProfilePic(e.target.files[0]);
+  useEffect(() => {
+    const loadData = async () => {
+      const userData = await fetchUserData();
+      setNewPhone(userData.phone);
+      setNewAddress(userData.address);
+    };
 
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("firstName", form.firstName);
-      formData.append("lastName", form.lastName);
-      formData.append("phone", form.phone);
-      if (profilePic) formData.append("profilePicture", profilePic);
+    loadData();
+  }, []);
 
-      await axios.put("/api/user/update-profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+  if (!user) return <div>Loading...</div>;
 
-      await loadUser();
-      setEditMode(false);
-    } catch (err) {
-      console.error(err);
-      alert("Failed to save changes. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  const isAdmin = user.roles == 4;
+
+  const handleEditToggle = () => {
+    setIsEditMode(!isEditMode);
   };
 
-  if (!user) return <div className="text-center mt-20 text-gray-500">Loading...</div>;
+  const handleSaveChanges = () => {
+    // This should send the updated data to the server (mocked here)
+    alert("Changes saved!");
+    setIsEditMode(false);
+  };
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 p-4 sm:p-6">
-      <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Profile */}
-        <div className="lg:col-span-1 bg-white p-6 rounded-lg shadow-md flex flex-col items-center space-y-4">
-          <img
-            src={user.profilePicture || "/default-avatar.png"}
-            alt="Profile"
-            className="w-32 h-32 rounded-full object-cover border-2 border-indigo-500"
-          />
-          {editMode ? (
-            <div className="w-full flex flex-col gap-2">
-              <input
-                name="firstName"
-                value={form.firstName}
-                onChange={handleChange}
-                placeholder="First Name"
-                className="border rounded-md px-2 py-1 w-full"
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="w-full md:w-2/3 lg:w-1/2 bg-white shadow-lg rounded-lg p-6">
+        <div className="flex items-center mb-6">
+          <div className="w-32 h-32 rounded-full bg-gray-200 flex justify-center items-center text-5xl text-white">
+            {user.profilePic ? (
+              <img
+                src={user.profilePic}
+                alt="Profile"
+                className="w-full h-full rounded-full object-cover"
               />
-              <input
-                name="lastName"
-                value={form.lastName}
-                onChange={handleChange}
-                placeholder="Last Name"
-                className="border rounded-md px-2 py-1 w-full"
-              />
-              <input
-                name="phone"
-                value={form.phone}
-                onChange={handleChange}
-                placeholder="Phone"
-                className="border rounded-md px-2 py-1 w-full"
-              />
-              <input
-                type="file"
-                onChange={handleImageChange}
-                className="text-sm text-gray-500"
-              />
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className="bg-green-600 text-white px-4 py-2 rounded-md mt-2 w-full disabled:opacity-50"
-              >
-                {loading ? "Saving..." : "Save Changes"}
-              </button>
-              <button
-                onClick={() => setEditMode(false)}
-                className="bg-gray-300 text-gray-800 px-4 py-2 rounded-md mt-2 w-full"
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-2xl font-semibold">{user.fullName}</h2>
-              <p className="text-gray-500">{user.email}</p>
-              <p className="text-gray-500">{user.phone || "—"}</p>
-              <button
-                onClick={() => setEditMode(true)}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md mt-4"
-              >
-                Edit Profile
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Right Column: Roles and Reports */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Roles */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold text-gray-700 mb-4">Roles</h3>
-            {user.roles?.length > 0 ? (
-              <ul className="list-disc list-inside text-gray-700 space-y-1">
-                {user.roles.map((role) => (
-                  <li key={role._id}>
-                    <span className="font-medium">{role.name}</span>
-                    {role.description && (
-                      <span className="text-gray-500 text-sm"> — {role.description}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
             ) : (
-              <p className="text-gray-500 text-sm">No roles assigned.</p>
+              <span>{user.firstName[0]}</span>
             )}
           </div>
+          <div className="ml-6">
+            <h1 className="text-3xl font-semibold text-gray-800">
+              {user.firstName} {user.lastName}
+            </h1>
+            <p className="text-lg text-gray-600">{user.email}</p>
+            <p className="text-sm text-gray-500">Reputation: {user.reputation}</p>
+          </div>
+        </div>
 
-          {/* Reports */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold text-gray-700 mb-4">Reports Involved</h3>
-            {user.reports?.length > 0 ? (
-              <ul className="divide-y">
-                {user.reports.map((rep) => (
-                  <li key={rep._id} className="py-2">
-                    <div className="flex justify-between">
-                      <span>{rep.title}</span>
-                      <span className="text-sm text-gray-500">{rep.status}</span>
-                    </div>
-                    <p className="text-xs text-gray-400">
-                      Created on {new Date(rep.createdAt).toLocaleDateString()}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-500 text-sm">No reports available.</p>
-            )}
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-800">Personal Info</h2>
+            <p className="text-gray-500">Phone: {isEditMode ? (
+              <input
+                type="text"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                className="mt-2 p-2 w-full border border-gray-300 rounded"
+              />
+            ) : user.phone}</p>
+            <p className="text-gray-500">Address: {isEditMode ? (
+              <input
+                type="text"
+                value={newAddress}
+                onChange={(e) => setNewAddress(e.target.value)}
+                className="mt-2 p-2 w-full border border-gray-300 rounded"
+              />
+            ) : user.address}</p>
+          </div>
+
+          {isEditMode && (
+            <div>
+              <label className="block text-gray-700">Change Profile Picture</label>
+              <input
+                type="file"
+                onChange={(e) => setNewProfilePic(e.target.files[0])}
+                className="mt-2 p-2 w-full border border-gray-300 rounded"
+              />
+            </div>
+          )}
+
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800">Location</h3>
+              <p className="text-gray-500">State: {user.state}</p>
+              <p className="text-gray-500">Zone: {user.zone}</p>
+              <p className="text-gray-500">Local Government: {user.localGovernment}</p>
+            </div>
+
+            <div className="text-right">
+              {isEditMode ? (
+                <button
+                  onClick={handleSaveChanges}
+                  className="bg-yellow-500 text-white py-2 px-6 rounded-md"
+                >
+                  Save Changes
+                </button>
+              ) : (
+                <button
+                  onClick={handleEditToggle}
+                  className="bg-green-500 text-white py-2 px-6 rounded-md"
+                >
+                  Edit Profile
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-xl font-semibold text-gray-800">Roles</h3>
+            {user.roles.map((role) => (
+              <p key={role} className="text-gray-500">{role}</p>
+            ))}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default Profile;
