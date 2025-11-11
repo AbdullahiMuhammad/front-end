@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const proxy = "http://localhost:5000/api";
+export const proxy = "http://72.61.115.207:5000/api";
 
 const axiosInstance = axios.create({
   baseURL: proxy,
